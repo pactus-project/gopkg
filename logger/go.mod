@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/logger
+module github.com/pactus/gopkg/logger
 
 go 1.25.1
 

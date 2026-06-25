@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/scheduler
+module github.com/pactus/gopkg/scheduler
 
 go 1.25.1
 

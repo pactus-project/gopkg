@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ezex-io/gopkg/env"
+	"github.com/pactus/gopkg/env"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

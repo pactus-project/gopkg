@@ -7,7 +7,7 @@ Common go http server middlewares
 package main
 
 import (
-	middleware "github.com/ezex-io/gopkg/middleware/http-mdl"
+	middleware "github.com/pactus/gopkg/middleware/http-mdl"
 	"net/http"
 )
 
@@ -18,7 +18,7 @@ func main() {
 	sv := &http.Server{
 		Handler: mux,
     }
-	
+
 	sv.ListenAndServe()
 }
 ```

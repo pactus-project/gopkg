@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ezex-io/gopkg/scheduler"
+	"github.com/pactus/gopkg/scheduler"
 )
 
 func TestAfterNotCanceled(t *testing.T) {
