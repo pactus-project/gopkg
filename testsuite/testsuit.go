@@ -74,8 +74,8 @@ func defaultRandOptions[T Integer]() RandOptions[T] {
 	}
 
 	return RandOptions[T]{
-		Min: zero, // 0 for all types
-		Max: maxVal,  // safe default max value for type
+		Min: zero,   // 0 for all types
+		Max: maxVal, // safe default max value for type
 	}
 }
 
@@ -97,7 +97,6 @@ func WithMax[T Integer](maxVal T) RandOption[T] {
 }
 
 // randInt generates a random integer of type T with the given options.
-//
 func randInt[T Integer](suite *TestSuite,
 	defaultRandOptions func() RandOptions[T], opts ...RandOption[T],
 ) T {
