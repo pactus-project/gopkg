@@ -1,4 +1,4 @@
-github.com/pactus-project/gopkg/scheduler v0.0.0-20260625072322-8287c72375d1 h1:dyj2LxaoA8whj5JPm0mSADqhmxv82KaeR7ntZoQ1+7Q=
-github.com/pactus-project/gopkg/scheduler v0.0.0-20260625072322-8287c72375d1/go.mod h1:/u5/1FpRYIgdTPvwaRPTIFXuBInitbtL60AlAqDkYN0=
+github.com/pactus-project/gopkg/scheduler v0.0.0-20260625084706-612d6d2bb21d h1:0T9u0241FiCIUcCTvpFeKsGd44fRcqFkcPNtk1/u5Gs=
+github.com/pactus-project/gopkg/scheduler v0.0.0-20260625084706-612d6d2bb21d/go.mod h1:R411cuOZcqs2wUZtFaVlV4dCMzqkyWeurlIE//w5/wQ=
 golang.org/x/sync v0.21.0 h1:HLII4xRRTtCRkxYp4HNFF0Js/Og6q2i++KXbg0gHCwM=
 golang.org/x/sync v0.21.0/go.mod h1:9xrNwdLfx4jkKbNva9FpL6vEN7evnE43NNNJQ2LF3+0=
