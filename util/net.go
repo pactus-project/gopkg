@@ -1,3 +1,5 @@
+// Package util provides common utility functions including random code
+// generation and context-aware network helpers.
 package util
 
 import (

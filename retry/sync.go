@@ -6,10 +6,13 @@ import (
 )
 
 type (
+	// SyncTask is a function that returns an error, used for synchronous retry.
 	SyncTask         func() error
+	// SyncTaskT is a generic function that returns a value and an error, used for synchronous retry.
 	SyncTaskT[T any] func() (T, error)
 )
 
+// Options is a functional option for configuring sync execution.
 type Options func(*syncOptions)
 
 type syncOptions struct {
@@ -24,12 +27,14 @@ func defaultSyncOpts() *syncOptions {
 	}
 }
 
+// WithSyncMaxRetries sets the maximum number of retry attempts for sync tasks.
 func WithSyncMaxRetries(maxRetries int) Options {
 	return func(o *syncOptions) {
 		o.maxRetries = maxRetries
 	}
 }
 
+// WithSyncRetryDelay sets the delay between retry attempts for sync tasks.
 func WithSyncRetryDelay(retryDelay time.Duration) Options {
 	return func(o *syncOptions) {
 		o.retryDelay = retryDelay
@@ -53,6 +58,7 @@ func ExecuteSync(ctx context.Context,
 // ExecuteSyncT executes a function synchronously with retry logic and returns a result
 // It respects context cancellation and timeout
 // Returns the result if the function succeeds, or the last error if all retries are exhausted.
+//
 func ExecuteSyncT[T any](ctx context.Context,
 	task SyncTaskT[T], opts ...Options,
 ) (T, error) {

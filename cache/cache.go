@@ -1,9 +1,11 @@
+// Package cache provides a generic, expiration-aware in-memory cache.
 package cache
 
 import (
 	"time"
 )
 
+// Cache defines a generic key-value store with expiration support.
 type Cache[K any, V any] interface {
 	// Add store your item to cache
 	Add(key K, value V, expiration time.Duration) bool

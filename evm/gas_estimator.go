@@ -1,3 +1,5 @@
+// Package evm provides utilities for Ethereum Virtual Machine interactions,
+// including gas estimation for contract calls.
 package evm
 
 import (
@@ -12,6 +14,8 @@ import (
 
 const basefeeWiggleMultiplier = 2
 
+// ContractGasEstimator combines the Ethereum gas estimation and pricing
+// interfaces with block header lookup.
 type ContractGasEstimator interface {
 	ethereum.GasEstimator
 	ethereum.GasPricer
@@ -22,6 +26,7 @@ type ContractGasEstimator interface {
 	HeaderByNumber(ctx context.Context, number *big.Int) (*types.Header, error)
 }
 
+// GasInfo holds the estimated gas parameters for an EIP-1559 transaction.
 type GasInfo struct {
 	EstimatedGasLimit uint64
 	BaseFee           *big.Int // baseFeePerGas

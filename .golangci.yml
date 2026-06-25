@@ -23,13 +23,14 @@ linters:
     - godot
     - goheader
     - gomoddirectives
-    - gomodguard
+    - gomodguard_v2
     - goprintffuncname
     - gosec
     - gosmopolitan
     - grouper
     - importas
     - ireturn
+    - lll
     - loggercheck
     - maintidx
     - makezero
@@ -55,6 +56,7 @@ linters:
     - tagalign
     - tagliatelle
     - testableexamples
+    - testifylint
     - thelper
     - tparallel
     - unconvert
@@ -65,22 +67,7 @@ linters:
     - wastedassign
     - whitespace
     - zerologlint
-    - testifylint
   settings:
-    gocritic:
-      disabled-checks:
-        - ifElseChain
-        - unnamedResult
-        - importShadow
-      enabled-tags:
-        - diagnostic
-        - style
-        - performance
-    gosec:
-      excludes:
-        - G304
-        - G204
-        - G115
     govet:
       disable:
         - fieldalignment
@@ -99,49 +86,26 @@ linters:
     revive:
       enable-all-rules: true
       rules:
-        - name: exported
-          disabled: true
-        - name: package-comments
-          disabled: true
-        - name: add-constant
-          disabled: true
-        - name: package-directory-mismatch
-          disabled: true
-        - name: var-naming
-          disabled: true
-        - name: enforce-switch-style
-          disabled: true
-        - name: redefines-builtin-id
-          disabled: true
-        - name: unchecked-type-assertion
-          disabled: true
-        - name: cyclomatic
-          disabled: true
-        - name: cognitive-complexity
-          disabled: true
-        - name: import-shadowing
-          disabled: true
-        - name: function-length
-          disabled: true
-        - name: line-length-limit
-          arguments:
-            - 120
-        - name: unhandled-error
-          arguments:
-            - fmt.Printf
-            - fmt.Println
-            - fmt.Fprintf
-            - strings.Builder.WriteString
-            - strings.Builder.WriteRune
-            - strings.Builder.WriteByte
-            - bytes.Buffer.Write
-            - bytes.Buffer.WriteString
+      - name: add-constant
+        disabled: true
+      - name: enforce-switch-style
+        disabled: true
+      - name: unchecked-type-assertion
+        disabled: true
+      - name: cyclomatic
+        disabled: true
+      - name: cognitive-complexity
+        disabled: true
+      - name: import-shadowing
+        disabled: true
+      # - name: package-naming
+      #   disable: true
+      - name: line-length-limit
+        arguments:
+          - 120
     staticcheck:
       checks:
         - all
-        - -SA1019
-        - -ST1000
-        - -ST1003
     tagliatelle:
       case:
         rules:
@@ -157,58 +121,16 @@ linters:
         - tt
         - i
         - j
-        - l
-        - h
         - il
         - r
         - w
         - db
         - tx
-      ignore-decls:
-        - wg sync.WaitGroup
-        - ts *testsuite.TestSuite
-        - td *testData
-        - ma multiaddr.Multiaddr
-        - db *leveldb.DB
-
+        - wg
     ireturn:
       allow: [anon, error, empty, stdlib, generic]
-
-    usetesting:
-      os-temp-dir: true
-      context-background: true
-      context-todo: true
-
   exclusions:
     generated: lax
     rules:
-      - linters:
-          - forbidigo
-          - gocognit
-          - maintidx
-          - nestif
-        path: _test.go
-      - path: (.+)\.go$
-        text: 'shadow: declaration of "err" shadows'
-      - path: (.+)\.go$
-        text: "builtinShadow: shadowing of predeclared identifier: min"
-      - path: (.+)\.go$
-        text: "builtinShadow: shadowing of predeclared identifier: max"
-      - path: (.+)\.go$
-        text: "builtinShadow: shadowing of predeclared identifier: len"
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
-formatters:
-  enable:
-    - gci
-    - gofmt
-    - gofumpt
-    - goimports
-  exclusions:
-    generated: lax
-    paths:
-      - third_party$
-      - builtin$
-      - examples$
+      - path: util/
+        text: "don't use \"util\" because it is a bad package name"

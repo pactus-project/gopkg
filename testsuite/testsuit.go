@@ -1,3 +1,5 @@
+// Package testsuite provides a deterministic, seed-based random testing
+// helper for reproducible test failures.
 package testsuite
 
 import (
@@ -19,6 +21,7 @@ type TestSuite struct {
 	Rand *rand.Rand
 }
 
+// GenerateSeed returns a new seed value based on the current UTC time.
 func GenerateSeed() int64 {
 	return time.Now().UTC().UnixNano()
 }
@@ -58,21 +61,21 @@ type RandOptions[T Integer] struct {
 // defaultRandOptions returns default options for any integer type.
 func defaultRandOptions[T Integer]() RandOptions[T] {
 	var zero T
-	var max T
+	var maxVal T
 
 	// Detect signed vs unsigned by comparison
 	if zero-1 < zero {
 		// signed
 		bits := uint(unsafe.Sizeof(zero)) * 8
-		max = T(1<<(bits-1) - 1)
+		maxVal = T(1<<(bits-1) - 1)
 	} else {
 		// unsigned
-		max = ^T(0)
+		maxVal = ^T(0)
 	}
 
 	return RandOptions[T]{
 		Min: zero, // 0 for all types
-		Max: max,  // safe default max value for type
+		Max: maxVal,  // safe default max value for type
 	}
 }
 
@@ -80,20 +83,21 @@ func defaultRandOptions[T Integer]() RandOptions[T] {
 type RandOption[T Integer] func(*RandOptions[T])
 
 // WithMin sets the minimum value.
-func WithMin[T Integer](min T) RandOption[T] {
+func WithMin[T Integer](minVal T) RandOption[T] {
 	return func(opts *RandOptions[T]) {
-		opts.Min = min
+		opts.Min = minVal
 	}
 }
 
 // WithMax sets the maximum value.
-func WithMax[T Integer](max T) RandOption[T] {
+func WithMax[T Integer](maxVal T) RandOption[T] {
 	return func(opts *RandOptions[T]) {
-		opts.Max = max
+		opts.Max = maxVal
 	}
 }
 
 // randInt generates a random integer of type T with the given options.
+//
 func randInt[T Integer](suite *TestSuite,
 	defaultRandOptions func() RandOptions[T], opts ...RandOption[T],
 ) T {
@@ -102,10 +106,10 @@ func randInt[T Integer](suite *TestSuite,
 		opt(&cfg)
 	}
 
-	min := int64(cfg.Min)
-	max := int64(cfg.Max)
+	minVal := int64(cfg.Min)
+	maxVal := int64(cfg.Max)
 
-	return T(suite.Rand.Int63n(max-min) + min)
+	return T(suite.Rand.Int63n(maxVal-minVal) + minVal)
 }
 
 // RandBool returns a random boolean value.
@@ -200,8 +204,10 @@ type randStringConfig struct {
 	charset string
 }
 
+// RandStringOption is a functional option for configuring random string generation.
 type RandStringOption func(*randStringConfig)
 
+// WithCharset sets the character set used for random string generation.
 func WithCharset(charset string) RandStringOption {
 	return func(c *randStringConfig) {
 		if charset != "" {
@@ -220,10 +226,10 @@ func (ts *TestSuite) RandString(length int, opts ...RandStringOption) string {
 		opt(&cfg)
 	}
 
-	max := len(cfg.charset)
+	maxLen := len(cfg.charset)
 	b := make([]byte, length)
 	for i := range b {
-		b[i] = cfg.charset[ts.RandInt(WithMax(max))]
+		b[i] = cfg.charset[ts.RandInt(WithMax(maxLen))]
 	}
 
 	return string(b)

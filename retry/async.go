@@ -1,3 +1,5 @@
+// Package retry provides utilities for executing tasks with configurable retry
+// logic, supporting both synchronous and asynchronous execution.
 package retry
 
 import (
@@ -6,9 +8,11 @@ import (
 )
 
 type (
+	// AsyncTask is a function executed asynchronously with retry support.
 	AsyncTask func()
 )
 
+// AsyncOptions is a functional option for configuring async execution.
 type AsyncOptions func(*asyncOptions)
 
 type asyncOptions struct {
@@ -23,12 +27,14 @@ func defaultAsyncOpts() *asyncOptions {
 	}
 }
 
+// WithAsyncMaxRetries sets the maximum number of retry attempts for async tasks.
 func WithAsyncMaxRetries(maxRetries int) AsyncOptions {
 	return func(o *asyncOptions) {
 		o.maxRetries = maxRetries
 	}
 }
 
+// WithAsyncRetryDelay sets the delay between retry attempts for async tasks.
 func WithAsyncRetryDelay(retryDelay time.Duration) AsyncOptions {
 	return func(o *asyncOptions) {
 		o.retryDelay = retryDelay

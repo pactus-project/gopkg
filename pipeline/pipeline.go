@@ -96,6 +96,7 @@ func New[T any](parentCtx context.Context, opts ...Option) Pipeline[T] {
 		opt(&cfg)
 	}
 
+	//nolint:gosec // cancel is stored and called in Close()
 	ctx, cancel := context.WithCancel(parentCtx)
 
 	pipe := &pipeline[T]{

@@ -1,3 +1,5 @@
+// Package scheduler provides a lightweight job scheduler with support for
+// one-shot, periodic, and cron-like task execution.
 package scheduler
 
 import (
@@ -5,6 +7,7 @@ import (
 	"time"
 )
 
+// AfterBuilder configures and triggers a one-time delayed execution.
 type AfterBuilder struct {
 	duration time.Duration
 }

@@ -1,5 +1,8 @@
+// Package logger provides a structured logging abstraction with global
+// convenience functions and pluggable backends.
 package logger
 
+// Logger defines the standard logging levels.
 type Logger interface {
 	// Debug logs a message at debug level.
 	// Use for verbose internal events like tracing or dev info.
@@ -22,6 +25,8 @@ type Logger interface {
 	Fatal(msg string, args ...any)
 }
 
+// Slogger extends Logger with the ability to create child loggers with
+// additional structured context.
 type Slogger interface {
 	Logger
 

@@ -33,13 +33,13 @@ func TestCache(t *testing.T) {
 
 	t.Run("update", func(t *testing.T) {
 		for k := range keyVal {
-			ok := cache.Update(k, 5, 3*time.Second)
-			if !ok {
+			exists := cache.Update(k, 5, 3*time.Second)
+			if !exists {
 				t.Errorf("failed update %s to cache", k)
 			}
-			val, ok := cache.Get(k)
-			if !ok {
-				t.Errorf("Get method failed. Expected Value: 1, Got: %v, Ok: %v", val, ok)
+			val, exists := cache.Get(k)
+			if !exists {
+				t.Errorf("Get method failed. Expected Value: 1, Got: %v, Ok: %v", val, exists)
 			}
 
 			break
