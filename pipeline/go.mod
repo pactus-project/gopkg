@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/pipeline
+module github.com/pactus-project/gopkg/pipeline
 
 go 1.25.1
 

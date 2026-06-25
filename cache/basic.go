@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ezex-io/gopkg/scheduler"
+	"github.com/pactus-project/gopkg/scheduler"
 )
 
 type BasicCache[K any, V any] struct {

@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/middleware/http-mdl
+module github.com/pactus-project/gopkg/middleware/http-mdl
 
 go 1.25.1
 
