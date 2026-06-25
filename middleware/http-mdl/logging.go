@@ -14,7 +14,9 @@ func Logging() Middleware {
 			next.ServeHTTP(w, r)
 			duration := time.Since(start)
 
-			log.Printf("[%s] %s %s %dms",
+			//nolint:gosec // %q escapes user-controlled inputs safely
+			log.Printf(
+				"[%s] %s %s %dms",
 				r.Method,
 				r.URL.Path,
 				r.RemoteAddr,

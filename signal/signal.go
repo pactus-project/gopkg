@@ -1,3 +1,4 @@
+// Package signal provides OS signal handling utilities for graceful shutdown.
 package signal
 
 import (
@@ -24,7 +25,8 @@ func HandleInterrupt(callback func()) {
 			exitCode += int(syscall.SIGTERM)
 		}
 
-		os.Exit(exitCode) //nolint:revive // exit is appropriate here
+		//nolint:revive // calls to os.Exit is acceptable here.
+		os.Exit(exitCode)
 	}, syscall.SIGINT, syscall.SIGTERM)
 }
 

@@ -18,25 +18,30 @@ func InitGlobalLogger() {
 	})
 }
 
+// Debug logs a debug-level message via the global logger.
 func Debug(msg string, args ...any) {
 	log(msg, slog.LevelDebug, args...)
 }
 
+// Info logs an info-level message via the global logger.
 func Info(msg string, args ...any) {
 	log(msg, slog.LevelInfo, args...)
 }
 
+// Warn logs a warning-level message via the global logger.
 func Warn(msg string, args ...any) {
 	log(msg, slog.LevelWarn, args...)
 }
 
+// Error logs an error-level message via the global logger.
 func Error(msg string, args ...any) {
 	log(msg, slog.LevelError, args...)
 }
 
+// Fatal logs an error-level message via the global logger and then exits.
 func Fatal(msg string, args ...any) {
 	log(msg, slog.LevelError, args...)
-	//nolint:revive // exit on fatal log
+	//nolint:revive // calls to os.Exit is acceptable here.
 	os.Exit(1)
 }
 

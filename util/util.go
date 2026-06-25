@@ -25,11 +25,11 @@ func GenerateRandomCode(length uint8, charset string) (string, error) {
 		charset = Digits
 	}
 
-	max := big.NewInt(int64(len(charset)))
+	maxVal := big.NewInt(int64(len(charset)))
 	code := make([]byte, length)
 
 	for i := range code {
-		num, err := rand.Int(rand.Reader, max)
+		num, err := rand.Int(rand.Reader, maxVal)
 		if err != nil {
 			return "", err // propagate error to caller
 		}

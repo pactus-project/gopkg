@@ -19,12 +19,14 @@ func TestCORSMiddleware(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequest(http.MethodGet, "http://test.com", http.NoBody)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://test.com", http.NoBody)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
 	res := w.Result()
-	defer res.Body.Close() //nolint:errcheck // test response body close error is not critical
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	assert.Equal(t, "https://example.com", res.Header.Get("Access-Control-Allow-Origin"))
@@ -41,12 +43,14 @@ func TestCORSMiddlewareOptionsRequest(t *testing.T) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
-	req := httptest.NewRequest(http.MethodOptions, "http://test.com", http.NoBody)
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodOptions, "http://test.com", http.NoBody)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
 	res := w.Result()
-	defer res.Body.Close() //nolint:errcheck // test response body close error is not critical
+	defer func() {
+		_ = res.Body.Close()
+	}()
 
 	assert.Equal(t, http.StatusNoContent, res.StatusCode)
 	assert.Equal(t, "*", res.Header.Get("Access-Control-Allow-Origin"))

@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// EveryBuilder configures and triggers a periodic execution on a fixed interval.
 type EveryBuilder struct {
 	duration time.Duration
 }

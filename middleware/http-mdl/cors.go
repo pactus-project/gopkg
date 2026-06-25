@@ -1,3 +1,5 @@
+// Package middleware provides HTTP middleware components including logging,
+// CORS handling, panic recovery, and middleware chaining.
 package middleware
 
 import (
@@ -5,6 +7,7 @@ import (
 	"strings"
 )
 
+// CORSConfig holds the configuration for Cross-Origin Resource Sharing.
 type CORSConfig struct {
 	AllowedOrigins   []string
 	AllowedMethods   []string

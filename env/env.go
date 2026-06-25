@@ -1,3 +1,4 @@
+// Package env provides typed environment variable retrieval with generic support.
 package env
 
 import (
@@ -10,6 +11,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
+// SupportedTypes is the constraint interface for types that GetEnv can return.
 type SupportedTypes interface {
 	~string | ~int | ~float64 | ~bool | ~[]string | time.Duration
 }
@@ -32,6 +34,7 @@ func WithDefault(defVal string) Option {
 // applies the provided options, and converts it to the desired type T.
 //
 // Panics if the conversion fails or the type is unsupported.
+//
 func GetEnv[T SupportedTypes](key string, options ...Option) T {
 	val := os.Getenv(key)
 	for _, opt := range options {

@@ -8,13 +8,16 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
+// Scheduler manages a collection of jobs and runs them on a configured interval.
 type Scheduler struct {
 	jobs      []Job
 	onSuccess func()
 }
 
+// Option is a functional option for configuring the Scheduler.
 type Option func(*Scheduler)
 
+// NewScheduler creates a new empty Scheduler instance.
 func NewScheduler() Scheduler {
 	return Scheduler{
 		jobs: make([]Job, 0),
@@ -28,6 +31,7 @@ func WithOnSuccess(cb func()) Option {
 	}
 }
 
+// AddJob registers a new job to be executed on each scheduler tick.
 func (s *Scheduler) AddJob(job Job) {
 	s.jobs = append(s.jobs, job)
 }

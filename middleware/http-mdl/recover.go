@@ -14,7 +14,8 @@ func Recover() Middleware {
 			defer func() {
 				if err := recover(); err != nil {
 					stack := captureStackTrace(3) // Skip 3 frames to start at panic origin
-					slog.Error("panic recovered",
+					slog.Error(
+						"panic recovered",
 						"error", err,
 						"stack", stack,
 					)

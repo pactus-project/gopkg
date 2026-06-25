@@ -8,6 +8,7 @@ import (
 	"github.com/pactus-project/gopkg/scheduler"
 )
 
+// BasicCache is a generic, concurrency-safe in-memory cache backed by sync.Map.
 type BasicCache[K any, V any] struct {
 	cache sync.Map
 }
@@ -17,6 +18,7 @@ type basicCacheEntry[V any] struct {
 	Expiry time.Time
 }
 
+// NewBasic creates a new BasicCache and starts a background cleanup goroutine.
 func NewBasic[K any, V any](ctx context.Context, opts ...Option) Cache[K, V] {
 	cfg := defaultConfig
 	for _, opt := range opts {
@@ -34,9 +36,9 @@ func NewBasic[K any, V any](ctx context.Context, opts ...Option) Cache[K, V] {
 	return cache
 }
 
-// Add add new time to cache
+// Add stores a new entry in the cache with the given expiration.
 //
-//   - expiration: 0 for disable expire cache
+//   - expiration: 0 for no expiry.
 func (c *BasicCache[K, V]) Add(key K, value V, expiration time.Duration) bool {
 	var expiry time.Time
 	if expiration != 0 {
@@ -49,6 +51,8 @@ func (c *BasicCache[K, V]) Add(key K, value V, expiration time.Duration) bool {
 	return true
 }
 
+// Get retrieves an entry from the cache by key.
+//
 func (c *BasicCache[K, V]) Get(key K) (V, bool) {
 	var zeroV V // zero Value of type V
 	value, ok := c.cache.Load(key)
@@ -59,16 +63,17 @@ func (c *BasicCache[K, V]) Get(key K) (V, bool) {
 	return value.(basicCacheEntry[V]).Value, true
 }
 
+// Update modifies the value and optionally the expiration of an existing entry.
 func (c *BasicCache[K, V]) Update(key K, newValue V, expiration time.Duration) bool {
 	// Check if the key exists in the cache
-	value, ok := c.cache.Load(key)
-	if !ok {
+	value, exists := c.cache.Load(key)
+	if !exists {
 		return false // Key not found, nothing to update
 	}
 
 	// Update the Value
-	entry, ok := value.(basicCacheEntry[V])
-	if !ok {
+	entry, exists := value.(basicCacheEntry[V])
+	if !exists {
 		return false
 	}
 	entry.Value = newValue
@@ -84,12 +89,14 @@ func (c *BasicCache[K, V]) Update(key K, newValue V, expiration time.Duration) b
 	return true
 }
 
+// Exists reports whether the given key is present in the cache.
 func (c *BasicCache[K, V]) Exists(key K) bool {
 	_, ok := c.cache.Load(key)
 
 	return ok
 }
 
+// Keys returns a slice of all keys currently stored in the cache.
 func (c *BasicCache[K, V]) Keys() []K {
 	keys := make([]K, 0)
 	c.cache.Range(func(key, _ any) bool {
@@ -101,6 +108,7 @@ func (c *BasicCache[K, V]) Keys() []K {
 	return keys
 }
 
+// Delete removes an entry from the cache by key.
 func (c *BasicCache[K, V]) Delete(key K) bool {
 	c.cache.Delete(key)
 	_, ok := c.cache.Load(key)
