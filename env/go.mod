@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/env
+module github.com/pactus-project/gopkg/env
 
 go 1.25.1
 

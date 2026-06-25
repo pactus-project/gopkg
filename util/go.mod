@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/util
+module github.com/pactus-project/gopkg/util
 
 go 1.25.1
 

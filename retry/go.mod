@@ -1,4 +1,4 @@
-module github.com/ezex-io/gopkg/retry
+module github.com/pactus-project/gopkg/retry
 
 go 1.25.1
 
