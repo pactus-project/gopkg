@@ -52,7 +52,6 @@ func (c *BasicCache[K, V]) Add(key K, value V, expiration time.Duration) bool {
 }
 
 // Get retrieves an entry from the cache by key.
-//
 func (c *BasicCache[K, V]) Get(key K) (V, bool) {
 	var zeroV V // zero Value of type V
 	value, ok := c.cache.Load(key)

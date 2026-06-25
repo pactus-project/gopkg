@@ -7,7 +7,7 @@ import (
 
 type (
 	// SyncTask is a function that returns an error, used for synchronous retry.
-	SyncTask         func() error
+	SyncTask func() error
 	// SyncTaskT is a generic function that returns a value and an error, used for synchronous retry.
 	SyncTaskT[T any] func() (T, error)
 )
@@ -58,7 +58,6 @@ func ExecuteSync(ctx context.Context,
 // ExecuteSyncT executes a function synchronously with retry logic and returns a result
 // It respects context cancellation and timeout
 // Returns the result if the function succeeds, or the last error if all retries are exhausted.
-//
 func ExecuteSyncT[T any](ctx context.Context,
 	task SyncTaskT[T], opts ...Options,
 ) (T, error) {
