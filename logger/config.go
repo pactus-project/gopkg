@@ -23,11 +23,11 @@ func DefaultConfig() *Config {
 		MaxBackups:         0,
 		RotateLogAfterDays: 1,
 		Compress:           true,
-		Targets:            []string{"console", "file"},
+		Targets:            []string{"console"},
 		Levels:             make(map[string]string),
 	}
 
-	conf.Levels["default"] = "info"
+	conf.Levels["default"] = "debug"
 
 	return conf
 }

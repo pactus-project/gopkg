@@ -16,3 +16,6 @@ todo
 .*.sw*
 
 .env
+
+# Go workspace sum (local only)
+go.work.sum
