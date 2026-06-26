@@ -29,6 +29,14 @@ type logger struct {
 	writer io.Writer
 }
 
+func getGlobalInst(ctx context.Context) *logger {
+	if globalInst == nil {
+		InitGlobalLogger(ctx, DefaultConfig())
+	}
+
+	return globalInst
+}
+
 // InitGlobalLogger initializes the global logger with the given config.
 // The context is used to attach initial fields to the root logger.
 // Subsequent calls are no-ops.

@@ -1,6 +1,10 @@
 package logger
 
-import "github.com/rs/zerolog"
+import (
+	"context"
+
+	"github.com/rs/zerolog"
+)
 
 // SubLogger is a named child logger that can attach an object
 // (implementing LogStringer) to every message and has its own log level.
@@ -12,16 +16,16 @@ type SubLogger struct {
 
 // NewSubLogger creates a new SubLogger with the given name and optional object.
 // It derives its log level from the global config's Levels map (falling back to "default").
-func NewSubLogger(name string, obj LogStringer) *SubLogger {
+func NewSubLogger(ctx context.Context, name string, obj LogStringer) *SubLogger {
 	sub := &SubLogger{
-		logger: zerolog.New(globalInst.writer).With().Timestamp().Logger(),
+		logger: zerolog.New(getGlobalInst(ctx).writer).With().Ctx(ctx).Timestamp().Logger(),
 		name:   name,
 		obj:    obj,
 	}
 
-	lvlStr := globalInst.config.Levels[name]
+	lvlStr := getGlobalInst(ctx).config.Levels[name]
 	if lvlStr == "" {
-		lvlStr = globalInst.config.Levels["default"]
+		lvlStr = getGlobalInst(ctx).config.Levels["default"]
 	}
 
 	lvl, err := zerolog.ParseLevel(lvlStr)

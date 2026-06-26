@@ -2,7 +2,6 @@ package logger
 
 import (
 	"bytes"
-	"context"
 	"errors"
 	"testing"
 
@@ -26,14 +25,14 @@ func (Bar) String() string {
 func setupTestLogger(t *testing.T, conf *Config) {
 	t.Helper()
 
-	InitGlobalLogger(context.Background(), conf)
+	InitGlobalLogger(t.Context(), conf)
 }
 
 func TestNilObjLogger(t *testing.T) {
 	conf := DefaultConfig()
 	setupTestLogger(t, conf)
 
-	l := NewSubLogger("test", nil)
+	l := NewSubLogger(t.Context(), "test", nil)
 	var buf bytes.Buffer
 	l.logger = l.logger.Output(&buf)
 
@@ -43,12 +42,25 @@ func TestNilObjLogger(t *testing.T) {
 }
 
 func TestSubLogger(t *testing.T) {
+	var buf bytes.Buffer
+	subLogger := NewSubLogger(t.Context(), "test", Foo{})
+	subLogger.logger = subLogger.logger.Output(&buf)
+
+	subLogger.Info("msg")
+
+	out := buf.String()
+
+	assert.Contains(t, out, "info")
+	assert.Contains(t, out, "msg")
+}
+
+func TestSubLoggerLevel(t *testing.T) {
 	conf := DefaultConfig()
 	conf.Colorful = false
 	setupTestLogger(t, conf)
 
 	globalInst.config.Levels["test"] = "warn"
-	subLogger := NewSubLogger("test", Foo{})
+	subLogger := NewSubLogger(t.Context(), "test", Foo{})
 	var buf bytes.Buffer
 	subLogger.logger = subLogger.logger.Output(&buf)
 
@@ -128,7 +140,7 @@ func TestInvalidLevel(t *testing.T) {
 	log.Logger = log.Logger.Output(&buf1)
 
 	globalInst.config.Levels["test"] = "invalid"
-	l := NewSubLogger("test", Foo{})
+	l := NewSubLogger(t.Context(), "test", Foo{})
 
 	var buf2 bytes.Buffer
 	l.logger = l.logger.Output(&buf2)
