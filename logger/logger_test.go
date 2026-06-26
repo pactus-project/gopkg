@@ -77,7 +77,7 @@ func TestLogger(t *testing.T) {
 	log.Logger = log.Output(&buf)
 
 	Trace("msg", "trace", "trace")
-	Debug("msg", "trace", "trace")
+	Debug("msg", "Debug", "Debug")
 	Info("msg", nil)
 	Info("msg", "a", nil)
 	Info("msg", "b", []byte{1, 2, 3})
@@ -89,7 +89,7 @@ func TestLogger(t *testing.T) {
 	t.Log(out)
 
 	assert.NotContains(t, out, "trace")
-	assert.NotContains(t, out, "debug")
+	assert.Contains(t, out, "debug")
 	assert.Contains(t, out, "foo")
 	assert.Contains(t, out, "010203")
 	assert.Contains(t, out, "!INVALID-KEY!")
