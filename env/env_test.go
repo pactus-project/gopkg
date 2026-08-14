@@ -1,20 +1,16 @@
 package env_test
 
 import (
-	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
 	"github.com/pactus-project/gopkg/env"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
-// TestGetEnvEmpty verifies ???
 func TestGetEnvEmpty(t *testing.T) {
-	assert.Empty(t, env.GetEnv[string]("MY_STRING"))
-	assert.Equal(t, []string{}, env.GetEnv[[]string]("MY_STRING_LIST"))
+	assert.Empty(t, env.GetEnv("MY_STRING", ""))
+	assert.Equal(t, []string{}, env.GetEnv("MY_STRING_LIST", []string{}))
 }
 
 // TestGetEnv verifies that environment variables are correctly parsed into supported types.
@@ -26,83 +22,41 @@ func TestGetEnv(t *testing.T) {
 	t.Setenv("MY_STRING_LIST", "str1,str2")
 	t.Setenv("MY_DURATION", "5m")
 
-	assert.Equal(t, 1, env.GetEnv[int]("MY_INT"))
-	assert.True(t, env.GetEnv[bool]("MY_BOOL"))
-	assert.InEpsilon(t, 3.14, env.GetEnv[float64]("MY_FLOAT"), 0.0001)
-	assert.Equal(t, "str", env.GetEnv[string]("MY_STRING"))
-	assert.Equal(t, []string{"str1", "str2"}, env.GetEnv[[]string]("MY_STRING_LIST"))
-	assert.Equal(t, time.Minute*5, env.GetEnv[time.Duration]("MY_DURATION"))
+	assert.Equal(t, 1, env.GetEnv("MY_INT", 0))
+	assert.True(t, env.GetEnv("MY_BOOL", false))
+	assert.InEpsilon(t, 3.14, env.GetEnv("MY_FLOAT", 0.0), 0.0001)
+	assert.Equal(t, "str", env.GetEnv("MY_STRING", ""))
+	assert.Equal(t, []string{"str1", "str2"}, env.GetEnv("MY_STRING_LIST", []string{}))
+	assert.Equal(t, time.Minute*5, env.GetEnv("MY_DURATION", time.Duration(0)))
 }
 
 // TestGetEnvWithDefault verifies that default values are used when environment variables are not set.
 func TestGetEnvWithDefault(t *testing.T) {
-	assert.Equal(t, 1, env.GetEnv[int]("MY_INT", env.WithDefault("1")))
-	assert.False(t, env.GetEnv[bool]("MY_BOOL", env.WithDefault("false")))
-	assert.True(t, env.GetEnv[bool]("MY_BOOL", env.WithDefault("true")))
-	assert.False(t, env.GetEnv[bool]("MY_BOOL", env.WithDefault("0")))
-	assert.True(t, env.GetEnv[bool]("MY_BOOL", env.WithDefault("1")))
-	assert.InEpsilon(t, 3.14, env.GetEnv[float64]("MY_FLOAT", env.WithDefault("3.14")), 0.0001)
-	assert.Equal(t, "str", env.GetEnv[string]("MY_STRING", env.WithDefault("str")))
-	assert.Equal(t, []string{"str1", "str2"}, env.GetEnv[[]string]("MY_STRING_LIST", env.WithDefault("str1,str2")))
-	assert.Equal(t, time.Second*5, env.GetEnv[time.Duration]("MY_DURATION", env.WithDefault("5s")))
-}
-
-// TestGetEnvNotSet ensures that calling GetEnv without a default on an unset variable panics.
-func TestGetEnvNotSet(t *testing.T) {
-	assert.Panics(t, func() {
-		assert.Equal(t, 1, env.GetEnv[int]("MY_INT"))
-	})
-	assert.Panics(t, func() {
-		assert.True(t, env.GetEnv[bool]("MY_BOOL"))
-	})
-	assert.Panics(t, func() {
-		assert.InEpsilon(t, 3.14, env.GetEnv[float64]("MY_FLOAT"), 0.0001)
-	})
-	assert.Panics(t, func() {
-		assert.Equal(t, "two seconds", env.GetEnv[time.Duration]("MY_DURATION"))
-	})
+	assert.Equal(t, 1, env.GetEnv("MY_INT", 1))
+	assert.False(t, env.GetEnv("MY_BOOL", false))
+	assert.True(t, env.GetEnv("MY_BOOL", true))
+	assert.InEpsilon(t, 3.14, env.GetEnv("MY_FLOAT", 3.14), 0.0001)
+	assert.Equal(t, "str", env.GetEnv("MY_STRING", "str"))
+	assert.Equal(t, []string{"str1", "str2"}, env.GetEnv("MY_STRING_LIST", []string{"str1", "str2"}))
+	assert.Equal(t, time.Second*5, env.GetEnv("MY_DURATION", time.Second*5))
 }
 
 // TestGetEnvWrongType checks that GetEnv panics when default values cannot be parsed into the desired type.
 func TestGetEnvWrongType(t *testing.T) {
 	assert.Panics(t, func() {
-		assert.Equal(t, 1, env.GetEnv[int]("MY_INT", env.WithDefault("one")))
+		t.Setenv("MY_INT", "one")
+		env.GetEnv("MY_INT", 0)
 	})
 	assert.Panics(t, func() {
-		assert.True(t, env.GetEnv[bool]("MY_BOOL", env.WithDefault("ok")))
+		t.Setenv("MY_BOOL", "ok")
+		env.GetEnv("MY_BOOL", false)
 	})
 	assert.Panics(t, func() {
-		assert.InEpsilon(t, 3.14, env.GetEnv[float64]("MY_FLOAT", env.WithDefault("pi")), 0.0001)
+		t.Setenv("MY_FLOAT", "pi")
+		env.GetEnv("MY_FLOAT", 0)
 	})
 	assert.Panics(t, func() {
-		assert.InEpsilon(t, 2.0, env.GetEnv[float64]("MY_DURATION", env.WithDefault("2 seconds")), 0.0001)
+		t.Setenv("MY_DURATION", "two seconds")
+		env.GetEnv("MY_DURATION", time.Duration(0))
 	})
-}
-
-func TestLoadEnvsFromFileSuccess(t *testing.T) {
-	tempDir := t.TempDir()
-	envPath := filepath.Join(tempDir, ".env")
-
-	err := os.WriteFile(envPath, []byte("FOO=bar"), 0o600)
-	if err != nil {
-		t.Fatalf("Failed to create test .env file: %v", err)
-	}
-
-	err = env.LoadEnvsFromFile(envPath)
-
-	require.NoError(t, err)
-	assert.Equal(t, "bar", os.Getenv("FOO"))
-}
-
-func TestLoadEnvsFromFileFileNotFound(t *testing.T) {
-	tempDir := t.TempDir()
-	envPath := filepath.Join(tempDir, "file-not-exists.env")
-
-	err := env.LoadEnvsFromFile(envPath)
-	assert.Error(t, err)
-}
-
-func TestLoadEnvsFromFileEmptyPath(t *testing.T) {
-	err := env.LoadEnvsFromFile()
-	assert.Error(t, err)
 }
