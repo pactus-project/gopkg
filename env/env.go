@@ -7,8 +7,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/joho/godotenv"
 )
 
 // SupportedTypes is the constraint interface for types that GetEnv can return.
@@ -16,28 +14,14 @@ type SupportedTypes interface {
 	~string | ~int | ~float64 | ~bool | ~[]string | time.Duration
 }
 
-// Option defines a function type that modifies a string value,
-// typically used for environment variable customization.
-type Option func(value *string)
-
-// WithDefault returns an Option that sets a default value
-// if the environment variable is not set or is empty.
-func WithDefault(defVal string) Option {
-	return func(val *string) {
-		if *val == "" {
-			*val = defVal
-		}
-	}
-}
-
-// GetEnv retrieves an environment variable by key,
-// applies the provided options, and converts it to the desired type T.
+// GetEnv retrieves an environment variable by key.
+// if the variable is not set, it returns the provided default value.
 //
 // Panics if the conversion fails or the type is unsupported.
-func GetEnv[T SupportedTypes](key string, options ...Option) T {
+func GetEnv[T SupportedTypes](key string, def T) T {
 	val := os.Getenv(key)
-	for _, opt := range options {
-		opt(&val)
+	if val == "" {
+		return def
 	}
 
 	var result T
@@ -88,10 +72,4 @@ func GetEnv[T SupportedTypes](key string, options ...Option) T {
 	default:
 		panic(fmt.Sprintf("unsupported type: %T", result))
 	}
-}
-
-// LoadEnvsFromFile loads environment variables from the specified file(s).
-// If a file is not found, it returns without an error.
-func LoadEnvsFromFile(envFile ...string) error {
-	return godotenv.Load(envFile...)
 }
