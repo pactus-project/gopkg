@@ -15,16 +15,14 @@ import (
 // Config is the interface implemented by configuration structs that can be
 // loaded from a file.
 type Config interface {
-	SetDefaults()
-	Override() error
 	BasicCheck() error
+
+	Override()
 }
 
 type loader = func(cfg Config, r io.Reader) error
 
 func loadFromFile(cfg Config, path string, loader loader) error {
-	cfg.SetDefaults()
-
 	file, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return fmt.Errorf("failed to open config file: %w", err)
@@ -37,9 +35,7 @@ func loadFromFile(cfg Config, path string, loader loader) error {
 		return fmt.Errorf("failed to load config from file: %w", err)
 	}
 
-	if err = cfg.Override(); err != nil {
-		return fmt.Errorf("failed to override config: %w", err)
-	}
+	cfg.Override()
 
 	if err = cfg.BasicCheck(); err != nil {
 		return fmt.Errorf("config validation failed: %w", err)
