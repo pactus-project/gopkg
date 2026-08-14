@@ -14,17 +14,11 @@ type Config struct {
 	Key2 string `yaml:"key2"`
 }
 
-func (c *Config) SetDefaults() {
-	c.Key1 = "default1"
-}
-
-func (c *Config) Override() error {
+func (c *Config) Override() {
 	val2 := os.Getenv("KEY2_OVERRIDE")
 	if val2 != "" {
 		c.Key2 = val2
 	}
-
-	return nil
 }
 
 func (c *Config) BasicCheck() error {
@@ -66,17 +60,6 @@ key1: value1
 `
 	_, err := loadConfig(t, configContent)
 	require.Error(t, err)
-}
-
-func TestDefaultValues(t *testing.T) {
-	configContent := `
-key2: value2
-`
-
-	cfg, err := loadConfig(t, configContent)
-	require.NoError(t, err)
-
-	assert.Equal(t, &Config{Key1: "default1", Key2: "value2"}, cfg)
 }
 
 func TestOverrideValues(t *testing.T) {
