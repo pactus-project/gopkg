@@ -10,8 +10,8 @@ import (
 )
 
 type Config struct {
-	Key1 string `yaml:"key1"`
-	Key2 string `yaml:"key2"`
+	Key1 string `toml:"key1" yaml:"key1"`
+	Key2 string `toml:"key2" yaml:"key2"`
 }
 
 func (c *Config) Override() {
@@ -90,13 +90,67 @@ key2: value2
 
 		assert.Equal(t, &Config{Key1: "value1", Key2: "overridden2"}, cfg)
 	})
+}
 
-	t.Run("TestYAMLUnknownField", func(t *testing.T) {
+func TestTOMLConfig(t *testing.T) {
+	loadTOMLConfig := func(t *testing.T, content string, strict bool) (*Config, error) {
+		t.Helper()
+
+		dir := t.TempDir()
+		if err := os.WriteFile(dir+"/config.toml", []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		cfg := &Config{}
+
+		return cfg, config.LoadFromTOML(cfg, dir+"/config.toml", config.WithStrict(strict))
+	}
+
+	t.Run("TestTOMLSuccessfulLoad", func(t *testing.T) {
 		configContent := `
-invalid: yaml
+key1 = 'value1'
+key2 = 'value2'
 `
 
-		_, err := loadYAMLConfig(t, configContent, true)
+		cfg, err := loadTOMLConfig(t, configContent, true)
+		require.NoError(t, err)
+
+		assert.Equal(t, &Config{Key1: "value1", Key2: "value2"}, cfg)
+	})
+
+	t.Run("TestTOMLStrict", func(t *testing.T) {
+		configContent := `
+key1 = 'value1'
+key2 = 'value2'
+key_unknown = 'value_unknown'
+`
+
+		_, err := loadTOMLConfig(t, configContent, true)
 		require.Error(t, err)
+
+		_, err = loadTOMLConfig(t, configContent, false)
+		require.NoError(t, err)
+	})
+
+	t.Run("TestTOMLBasicCheck", func(t *testing.T) {
+		configContent := `
+key1 = 'value1'
+`
+		_, err := loadTOMLConfig(t, configContent, true)
+		require.Error(t, err)
+	})
+
+	t.Run("TestTOMLOverrideValues", func(t *testing.T) {
+		configContent := `
+key1 = 'value1'
+key2 = 'value2'
+`
+
+		t.Setenv("KEY2_OVERRIDE", "overridden2")
+
+		cfg, err := loadTOMLConfig(t, configContent, true)
+		require.NoError(t, err)
+
+		assert.Equal(t, &Config{Key1: "value1", Key2: "overridden2"}, cfg)
 	})
 }
