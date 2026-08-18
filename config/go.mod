@@ -8,5 +8,6 @@ require gopkg.in/yaml.v3 v3.0.1
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/pelletier/go-toml/v2 v2.4.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 )

@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/pelletier/go-toml/v2"
 	"gopkg.in/yaml.v3"
 )
 
@@ -20,9 +21,29 @@ type Config interface {
 	Override()
 }
 
-type loader = func(cfg Config, r io.Reader) error
+// parseOptions holds the configuration settings for the parsing operation.
+type parseOptions struct {
+	Strict bool
+}
 
-func loadFromFile(cfg Config, path string, loader loader) error {
+// Option defines a function signature used to configure parseOptions.
+type Option func(*parseOptions)
+
+// WithStrict configures whether the parser should run in strict mode.
+func WithStrict(strict bool) Option {
+	return func(o *parseOptions) {
+		o.Strict = strict
+	}
+}
+
+type loader = func(cfg Config, r io.Reader, opts *parseOptions) error
+
+func loadFromFile(cfg Config, path string, loader loader, opts ...Option) error {
+	parsOpts := &parseOptions{Strict: false} // default value
+	for _, opt := range opts {
+		opt(parsOpts)
+	}
+
 	file, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return fmt.Errorf("failed to open config file: %w", err)
@@ -31,7 +52,7 @@ func loadFromFile(cfg Config, path string, loader loader) error {
 		_ = file.Close()
 	}()
 
-	if err = loader(cfg, file); err != nil {
+	if err = loader(cfg, file, parsOpts); err != nil {
 		return fmt.Errorf("failed to load config from file: %w", err)
 	}
 
@@ -44,19 +65,40 @@ func loadFromFile(cfg Config, path string, loader loader) error {
 	return nil
 }
 
-func loaderYAML(cfg Config, r io.Reader) error {
+func loaderYAML(cfg Config, r io.Reader, opts *parseOptions) error {
 	decoder := yaml.NewDecoder(r)
-	decoder.KnownFields(true)
 
-	if decodeErr := decoder.Decode(cfg); decodeErr != nil {
-		return fmt.Errorf("failed to decode config file: %w", decodeErr)
+	if opts.Strict {
+		decoder.KnownFields(true)
+	}
+
+	if err := decoder.Decode(cfg); err != nil {
+		return fmt.Errorf("failed to decode config file: %w", err)
 	}
 
 	return nil
 }
 
-// LoadFromYAML loads cfg from the YAML file at path, applying defaults,
-// environment overrides, and basic validation.
-func LoadFromYAML(cfg Config, path string) error {
-	return loadFromFile(cfg, path, loaderYAML)
+// LoadFromYAML loads cfg from the YAML file at path,
+// applying overrides, and basic validation.
+func LoadFromYAML(cfg Config, path string, opts ...Option) error {
+	return loadFromFile(cfg, path, loaderYAML, opts...)
+}
+
+func loaderTOML(cfg Config, r io.Reader, opts *parseOptions) error {
+	decoder := toml.NewDecoder(r)
+	if opts.Strict {
+		decoder.DisallowUnknownFields()
+	}
+	if err := decoder.Decode(cfg); err != nil {
+		return fmt.Errorf("failed to decode config file: %w", err)
+	}
+
+	return nil
+}
+
+// LoadFromTOML loads cfg from the TOML file at path,
+// applying overrides, and basic validation.
+func LoadFromTOML(cfg Config, path string, opts ...Option) error {
+	return loadFromFile(cfg, path, loaderTOML, opts...)
 }
