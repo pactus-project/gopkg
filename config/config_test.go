@@ -29,58 +29,74 @@ func (c *Config) BasicCheck() error {
 	return nil
 }
 
-func loadConfig(t *testing.T, content string) (*Config, error) {
-	t.Helper()
+func TestYAMLConfig(t *testing.T) {
+	loadYAMLConfig := func(t *testing.T, content string, strict bool) (*Config, error) {
+		t.Helper()
 
-	dir := t.TempDir()
-	if err := os.WriteFile(dir+"/config.yaml", []byte(content), 0o600); err != nil {
-		t.Fatal(err)
+		dir := t.TempDir()
+		if err := os.WriteFile(dir+"/config.yaml", []byte(content), 0o600); err != nil {
+			t.Fatal(err)
+		}
+
+		cfg := &Config{}
+
+		return cfg, config.LoadFromYAML(cfg, dir+"/config.yaml", config.WithStrict(strict))
 	}
 
-	cfg := &Config{}
-
-	return cfg, config.LoadFromYAML(cfg, dir+"/config.yaml")
-}
-
-func TestSuccessfulLoad(t *testing.T) {
-	configContent := `
+	t.Run("TestYAMLSuccessfulLoad", func(t *testing.T) {
+		configContent := `
 key1: value1
 key2: value2
 `
 
-	cfg, err := loadConfig(t, configContent)
-	require.NoError(t, err)
+		cfg, err := loadYAMLConfig(t, configContent, true)
+		require.NoError(t, err)
 
-	assert.Equal(t, &Config{Key1: "value1", Key2: "value2"}, cfg)
-}
+		assert.Equal(t, &Config{Key1: "value1", Key2: "value2"}, cfg)
+	})
 
-func TestBasicCheck(t *testing.T) {
-	configContent := `
+	t.Run("TestYAMLStrict", func(t *testing.T) {
+		configContent := `
+key1: value1
+key2: value2
+key_unknown: value_unknown
+`
+
+		_, err := loadYAMLConfig(t, configContent, true)
+		require.Error(t, err)
+
+		_, err = loadYAMLConfig(t, configContent, false)
+		require.NoError(t, err)
+	})
+
+	t.Run("TestYAMLBasicCheck", func(t *testing.T) {
+		configContent := `
 key1: value1
 `
-	_, err := loadConfig(t, configContent)
-	require.Error(t, err)
-}
+		_, err := loadYAMLConfig(t, configContent, true)
+		require.Error(t, err)
+	})
 
-func TestOverrideValues(t *testing.T) {
-	configContent := `
+	t.Run("TestYAMLOverrideValues", func(t *testing.T) {
+		configContent := `
 key1: value1
 key2: value2
 `
 
-	t.Setenv("KEY2_OVERRIDE", "overridden2")
+		t.Setenv("KEY2_OVERRIDE", "overridden2")
 
-	cfg, err := loadConfig(t, configContent)
-	require.NoError(t, err)
+		cfg, err := loadYAMLConfig(t, configContent, true)
+		require.NoError(t, err)
 
-	assert.Equal(t, &Config{Key1: "value1", Key2: "overridden2"}, cfg)
-}
+		assert.Equal(t, &Config{Key1: "value1", Key2: "overridden2"}, cfg)
+	})
 
-func TestUnknownField(t *testing.T) {
-	configContent := `
+	t.Run("TestYAMLUnknownField", func(t *testing.T) {
+		configContent := `
 invalid: yaml
 `
 
-	_, err := loadConfig(t, configContent)
-	require.Error(t, err)
+		_, err := loadYAMLConfig(t, configContent, true)
+		require.Error(t, err)
+	})
 }
