@@ -1,6 +1,6 @@
-// Package net provides context-aware helpers for dialing and listening on
+// Package netutil provides context-aware helpers for dialing and listening on
 // network connections, with functional options for common configurations.
-package net
+package netutil
 
 import (
 	"context"

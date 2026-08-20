@@ -7,7 +7,7 @@ use (
 	./evm
 	./logger
 	./middleware/http-mdl
-	./net
+	./netutil
 	./pipeline
 	./retry
 	./scheduler
