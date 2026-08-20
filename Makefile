@@ -1,4 +1,4 @@
-PACKAGES := cache config env evm logger middleware/http-mdl pipeline retry scheduler signal testsuite util
+PACKAGES := cache config env evm logger middleware/http-mdl net pipeline retry scheduler signal testsuite util
 ROOT_DIR := $(shell pwd)
 LINT_CONFIG := $(ROOT_DIR)/.golangci.yml
 

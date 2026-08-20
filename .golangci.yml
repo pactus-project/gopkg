@@ -134,3 +134,5 @@ linters:
     rules:
       - path: util/
         text: "don't use \"util\" because it is a bad package name"
+      - path: net/
+        text: "don't use \"net\" because it conflicts with common Go standard library package \"net\""
