@@ -28,8 +28,7 @@ func WithShutdownTimeout(d time.Duration) Option {
 
 // HandleInterrupt sets up signal handling for graceful shutdown on SIGINT and SIGTERM.
 // The callback is called with a context that carries the shutdown deadline.
-// After the callback executes (or the deadline expires), the process exits with
-// the appropriate Unix exit code.
+// After the callback executes, the process exits with the appropriate Unix exit code.
 func HandleInterrupt(callback func(ctx context.Context), opts ...Option) {
 	cfg := options{shutdownTimeout: defaultShutdownTimeout}
 	for _, opt := range opts {
@@ -39,16 +38,7 @@ func HandleInterrupt(callback func(ctx context.Context), opts ...Option) {
 	HandleSignals(func(sig os.Signal) {
 		if callback != nil {
 			ctx, cancel := context.WithTimeout(context.Background(), cfg.shutdownTimeout)
-			done := make(chan struct{})
-			go func() {
-				callback(ctx)
-				close(done)
-			}()
-
-			select {
-			case <-done:
-			case <-ctx.Done():
-			}
+			callback(ctx)
 			cancel()
 		}
 
