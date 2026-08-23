@@ -1,4 +1,5 @@
-# http middleware
+# HTTP middleware
+
 Common go http server middlewares
 
 # Example
@@ -7,7 +8,7 @@ Common go http server middlewares
 package main
 
 import (
-	middleware "github.com/pactus-project/gopkg/middleware/http-mdl"
+	"github.com/pactus-project/gopkg/netutil/http/middleware"
 	"net/http"
 )
 
