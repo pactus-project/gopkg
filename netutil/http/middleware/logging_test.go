@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"bytes"
-	"log"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -12,7 +12,9 @@ import (
 
 func TestLoggingMiddleware(t *testing.T) {
 	var logBuffer bytes.Buffer
-	log.SetOutput(&logBuffer)
+	originalLogger := slog.Default()
+	slog.SetDefault(slog.New(slog.NewTextHandler(&logBuffer, nil)))
+	defer slog.SetDefault(originalLogger)
 
 	middleware := Logging()
 
@@ -30,6 +32,8 @@ func TestLoggingMiddleware(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	logged := logBuffer.String()
-	assert.Contains(t, logged, "[GET] /foo 127.0.0.1")
-	assert.Contains(t, logged, "ms")
+	assert.Contains(t, logged, "method=GET")
+	assert.Contains(t, logged, "path=/foo")
+	assert.Contains(t, logged, "remote=127.0.0.1")
+	assert.Contains(t, logged, "duration_ms=")
 }

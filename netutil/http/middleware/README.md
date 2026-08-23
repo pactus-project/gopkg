@@ -15,10 +15,11 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	middleware.Chain(middleware.Logging(), middleware.Recover())(mux)
 	sv := &http.Server{
-		Handler: mux,
-    }
+		Handler: middleware.Chain(
+			middleware.Logging(),
+			middleware.Recover())(mux),
+	}
 
 	sv.ListenAndServe()
 }
