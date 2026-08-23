@@ -1,4 +1,5 @@
-# http middleware
+# HTTP middleware
+
 Common go http server middlewares
 
 # Example
@@ -7,17 +8,18 @@ Common go http server middlewares
 package main
 
 import (
-	middleware "github.com/pactus-project/gopkg/middleware/http-mdl"
+	"github.com/pactus-project/gopkg/netutil/http/middleware"
 	"net/http"
 )
 
 func main() {
 	mux := http.NewServeMux()
 
-	middleware.Chain(middleware.Logging(), middleware.Recover())(mux)
 	sv := &http.Server{
-		Handler: mux,
-    }
+		Handler: middleware.Chain(
+			middleware.Logging(),
+			middleware.Recover())(mux),
+	}
 
 	sv.ListenAndServe()
 }

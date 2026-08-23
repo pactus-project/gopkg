@@ -20,6 +20,7 @@ func TestCORSMiddleware(t *testing.T) {
 	}))
 
 	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://test.com", http.NoBody)
+	req.Header.Set("Origin", "https://example.com")
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, req)
@@ -33,6 +34,7 @@ func TestCORSMiddleware(t *testing.T) {
 	assert.Equal(t, "GET, POST, PUT, DELETE, OPTIONS", res.Header.Get("Access-Control-Allow-Methods"))
 	assert.Equal(t, "Content-Type, Authorization", res.Header.Get("Access-Control-Allow-Headers"))
 	assert.Equal(t, "true", res.Header.Get("Access-Control-Allow-Credentials"))
+	assert.Contains(t, res.Header.Values("Vary"), "Origin")
 }
 
 func TestCORSMiddlewareOptionsRequest(t *testing.T) {
@@ -54,4 +56,53 @@ func TestCORSMiddlewareOptionsRequest(t *testing.T) {
 
 	assert.Equal(t, http.StatusNoContent, res.StatusCode)
 	assert.Equal(t, "*", res.Header.Get("Access-Control-Allow-Origin"))
+}
+
+func TestCORSMiddlewareCredentialsWithWildcard(t *testing.T) {
+	config := DefaultCORSConfig()
+	config.AllowCredentials = true
+
+	middleware := CORS(&config)
+
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://test.com", http.NoBody)
+	req.Header.Set("Origin", "https://example.com")
+	w := httptest.NewRecorder()
+
+	handler.ServeHTTP(w, req)
+	res := w.Result()
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Equal(t, "https://example.com", res.Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "true", res.Header.Get("Access-Control-Allow-Credentials"))
+}
+
+func TestCORSMiddlewareDisallowedOrigin(t *testing.T) {
+	config := DefaultCORSConfig()
+	config.AllowedOrigins = []string{"https://example.com"}
+
+	middleware := CORS(&config)
+
+	handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	}))
+
+	req := httptest.NewRequestWithContext(t.Context(), http.MethodGet, "http://test.com", http.NoBody)
+	req.Header.Set("Origin", "https://evil.com")
+	w := httptest.NewRecorder()
+
+	handler.ServeHTTP(w, req)
+	res := w.Result()
+	defer func() {
+		_ = res.Body.Close()
+	}()
+
+	assert.Equal(t, http.StatusOK, res.StatusCode)
+	assert.Empty(t, res.Header.Get("Access-Control-Allow-Origin"))
 }

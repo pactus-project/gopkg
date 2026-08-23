@@ -6,7 +6,6 @@ use (
 	./env
 	./evm
 	./logger
-	./middleware/http-mdl
 	./netutil
 	./pipeline
 	./retry
