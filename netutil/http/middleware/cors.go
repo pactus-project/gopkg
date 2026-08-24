@@ -10,10 +10,10 @@ import (
 
 // CORSConfig holds the configuration for Cross-Origin Resource Sharing.
 type CORSConfig struct {
-	AllowedOrigins   []string
-	AllowedMethods   []string
-	AllowedHeaders   []string
-	AllowCredentials bool
+	AllowedOrigins   []string `yaml:"allowed_origins"`
+	AllowedMethods   []string `yaml:"allowed_methods"`
+	AllowedHeaders   []string `yaml:"allowed_headers"`
+	AllowCredentials bool     `yaml:"allow_credentials"`
 }
 
 // DefaultCORSConfig returns a default CORS configuration.
