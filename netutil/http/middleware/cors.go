@@ -3,6 +3,7 @@
 package middleware
 
 import (
+	"errors"
 	"net/http"
 	"slices"
 	"strings"
@@ -17,13 +18,26 @@ type CORSConfig struct {
 }
 
 // DefaultCORSConfig returns a default CORS configuration.
-func DefaultCORSConfig() CORSConfig {
-	return CORSConfig{
+func DefaultCORSConfig() *CORSConfig {
+	return &CORSConfig{
 		AllowedOrigins:   []string{"*"},
-		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Content-Type", "Authorization"},
+		AllowedMethods:   []string{"*"},
+		AllowedHeaders:   []string{"*"},
 		AllowCredentials: false,
 	}
+}
+
+// BasicCheck performs basic validation on the configuration.
+func (c *CORSConfig) BasicCheck() error {
+	if slices.Contains(c.AllowedOrigins, "*") && c.AllowCredentials {
+		return errors.New("wildcard origin '*' cannot be used with allow_credentials=true")
+	}
+
+	if slices.Contains(c.AllowedMethods, "*") && c.AllowCredentials {
+		return errors.New("wildcard method '*' cannot be used with allow_credentials=true")
+	}
+
+	return nil
 }
 
 // CORS creates middleware to handle CORS requests.
@@ -43,11 +57,7 @@ func CORS(config *CORSConfig) Middleware {
 
 			origin := r.Header.Get("Origin")
 			switch {
-			case allowAllOrigins && config.AllowCredentials && origin != "":
-				// Credentials cannot be combined with a wildcard origin, so
-				// echo the request origin instead.
-				w.Header().Set("Access-Control-Allow-Origin", origin)
-			case allowAllOrigins && !config.AllowCredentials:
+			case allowAllOrigins:
 				w.Header().Set("Access-Control-Allow-Origin", "*")
 			case origin != "":
 				if _, ok := allowedOrigins[origin]; ok {
