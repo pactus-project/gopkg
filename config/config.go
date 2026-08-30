@@ -1,5 +1,5 @@
 // Package config provides a minimal configuration-loading utility: it reads a
-// config file into a struct implementing Config, applying defaults, overrides,
+// config file into a struct implementing Config, applying optional overrides,
 // and basic validation.
 package config
 
@@ -17,13 +17,12 @@ import (
 // loaded from a file.
 type Config interface {
 	BasicCheck() error
-
-	Override()
 }
 
 // parseOptions holds the configuration settings for the parsing operation.
 type parseOptions struct {
-	Strict bool
+	Strict   bool
+	Override func(Config)
 }
 
 // Option defines a function signature used to configure parseOptions.
@@ -33,6 +32,16 @@ type Option func(*parseOptions)
 func WithStrict(strict bool) Option {
 	return func(o *parseOptions) {
 		o.Strict = strict
+	}
+}
+
+// WithOverride configures a function to apply overrides after decoding the
+// config file.
+func WithOverride[T Config](override func(T)) Option {
+	return func(o *parseOptions) {
+		o.Override = func(cfg Config) {
+			override(cfg.(T))
+		}
 	}
 }
 
@@ -56,7 +65,9 @@ func loadFromFile(cfg Config, path string, loader loader, opts ...Option) error 
 		return fmt.Errorf("failed to load config from file: %w", err)
 	}
 
-	cfg.Override()
+	if parsOpts.Override != nil {
+		parsOpts.Override(cfg)
+	}
 
 	if err = cfg.BasicCheck(); err != nil {
 		return fmt.Errorf("config validation failed: %w", err)
